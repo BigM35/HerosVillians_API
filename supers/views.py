@@ -1,55 +1,55 @@
 from urllib import response
-from django.shortcuts import render
-
-# Create your views here.
-from snippets.models import Snippet
-from snippets.serializers import SnippetSerializer
+from supers.models import Supers
+from supers.serializers import SuperSerializer
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+# Create your views here.
 
-
-
-class SnippetList(APIView):
-    
+class SupersList(APIView):
+    #Get all
     def get(self,request, format = None):
-        snippets = Snippet.objects.all()
-        serializer = SnippetSerializer(snippets, many = True)
+        supers = Supers.objects.all()
+        serializer = SuperSerializer(supers, many = True)
         return Response(serializer.data)
-    
+    #Create 
     def post(self, request, format = None):
-        serializer = SnippetSerializer(data = request.data)
+        serializer = SuperSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
 
-class SnippetDetail(APIView):
+class SupersDetail(APIView):
 
+    #Get Obj given a primary key and store it 
     def get_object(self, pk):
         try:
-            return  Snippet.object.get(pk=pk)
+            return  Supers.objects.get(pk=pk)
         except:
             return Http404
 
+    #Get a single object
     def get(self, request, pk, format = None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet)
+        supers = self.get_object(pk)
+        serializer = SuperSerializer(supers)
         return Response(serializer.data)
 
+    #Update an object
     def put(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, request.data)
+        supers = self.get_object(pk)
+        serializer = SuperSerializer(supers, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data)
         return response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, pk, format=None):
-        snippet = self.get_object(pk)
-        snippet.delete()
+    #delete
+    def delete(self, request, pk, format=None):
+        sup = self.get_object(pk)
+        sup.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
