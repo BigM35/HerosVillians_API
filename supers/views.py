@@ -1,4 +1,5 @@
 from urllib import response
+from super_types.models import SuperType
 from supers.models import Supers
 from supers.serializers import SuperSerializer
 from django.http import Http404
@@ -11,9 +12,21 @@ from rest_framework import status
 class SupersList(APIView):
     #Get all
     def get(self,request, format = None):
+        super_types = request.query_params.get('type')
         supers = Supers.objects.all()
-        serializer = SuperSerializer(supers, many = True)
-        return Response(serializer.data)
+        if super_types: 
+            supers = supers.filter(super_type__type=super_types)
+            serializer = SuperSerializer(supers, many = True)
+            return Response(serializer.data)
+        else:
+            all_supers = {}
+            super_types = SuperType.objects.all()
+            for superr in super_types:
+                supers = Supers.objects.filter(super_type_id=superr.id)
+                super_serializer = SuperSerializer(supers, many=True)
+                all_supers[superr.type] = super_serializer.data
+            return Response(all_supers)
+
     #Create 
     def post(self, request, format = None):
         serializer = SuperSerializer(data = request.data)
@@ -25,7 +38,7 @@ class SupersList(APIView):
 
 class SupersDetail(APIView):
 
-    #Get Obj given a primary key and store it 
+    #Query supers given a primary key and return values 
     def get_object(self, pk):
         try:
             return  Supers.objects.get(pk=pk)
@@ -49,7 +62,7 @@ class SupersDetail(APIView):
 
     #delete
     def delete(self, request, pk, format=None):
-        sup = self.get_object(pk)
-        sup.delete()
+        supers = self.get_object(pk)
+        supers.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

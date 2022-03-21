@@ -27,7 +27,7 @@ class SuperTypeDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return  SuperType.object.get(pk=pk)
+            return  SuperType.objects.get(pk=pk)
         except:
             return Http404
 
@@ -44,7 +44,7 @@ class SuperTypeDetail(APIView):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, pk, format=None):
+    def delete(self, request, pk, format=None):
         super_type = self.get_object(pk)
         super_type.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
